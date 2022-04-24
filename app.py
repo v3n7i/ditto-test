@@ -10,7 +10,7 @@ slack_event_adapter = SlackEventAdapter(os.environ['SLACK_SIGNIN_SECRET'], '/sla
 client = slack_sdk.WebClient(token=os.environ['SLACK_BOT_TOKEN'])
 
 client.chat_postMessage(channel='#ditto-testing', text='Ditto running...')
-BOT_ID = client.api_call("auth.text")
+BOT_ID = client.bots_info['bot']['app_id']
 
 
 @slack_event_adapter.on('message')
