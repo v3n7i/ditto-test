@@ -64,5 +64,5 @@ def update_home_tab(client, event, logger):
 
 # Start your app
 if __name__ == "__main__":
-    SocketModeHandler(app, os.environ.get("SLACK_SIGNING_SECRET")).start()
+    SocketModeHandler(app, os.environ["SLACK_APP_TOKEN"]).start()
     #signing_secret = os.environ.get("SLACK_SIGNING_SECRET")
