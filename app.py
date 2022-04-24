@@ -1,15 +1,17 @@
 import slack
-from slack import WebClient
 import os
 from flask import Flask
 from slackeventsapi import SlackEventAdapter
+import slack_sdk
+
 
 app = Flask(__name__)
 slack_event_adapter = SlackEventAdapter(os.environ['SLACK_SIGNIN_SECRET'], '/slack/events', app)
-client = WebClient(token=os.environ['SLACK_BOT_TOKEN'])
+client = slack_sdk.WebClient(token=os.environ['SLACK_BOT_TOKEN'])
 
 client.chat_postMessage(channel='#ditto-testing', text='Ditto running...')
 BOT_ID = client.api_call("auth.text")
+
 
 @slack_event_adapter.on('message')
 def message(payload):
