@@ -1,27 +1,68 @@
-import slack
 import os
-from flask import Flask
-from slackeventsapi import SlackEventAdapter
-import slack_sdk
+from slack_bolt import App
+
+# Initializes your app with your bot token and signing secret
+app = App(
+    token=os.environ.get("SLACK_BOT_TOKEN"),
+    signing_secret=os.environ.get("SLACK_SIGNING_SECRET")
+)
+
+@app.message("hello")
+def message_hello(message, say):
+    say(f"Hey there <@{message['user']}>")
 
 
-app = Flask(__name__)
-slack_event_adapter = SlackEventAdapter(os.environ['SLACK_SIGNIN_SECRET'], '/slack/events', app)
-client = slack_sdk.WebClient(token=os.environ['SLACK_BOT_TOKEN'])
+@app.event("app_home_opened")
+def update_home_tab(client, event, logger):
+    try:
+        # views.publish is the method that your app uses to push a view to the Home tab
+        client.views_publish(
+            # the user that opened your app's app home
+            user_id=event["user"],
+            # the view object that appears in the app home
+            view={
+                "type": "home",
+                "callback_id": "home_view",
 
-client.chat_postMessage(channel='#ditto-testing', text='Ditto running...')
-BOT_ID = client.bots_info['bot']['app_id']
+                # body of the view
+                "blocks": [
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": "*Welcome to your _App's Home_* :tada:"
+                        }
+                    },
+                    {
+                        "type": "divider"
+                    },
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": "This button won't do much for now but you can set up a listener for it using the `actions()` method and passing its unique `action_id`. See an example in the `examples` folder within your Bolt app."
+                        }
+                    },
+                    {
+                        "type": "actions",
+                        "elements": [
+                            {
+                                "type": "button",
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "Click me!"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        )
+
+    except Exception as e:
+        logger.error(f"Error publishing home tab: {e}")
 
 
-@slack_event_adapter.on('message')
-def message(payload):
-    event = payload.get('event', {})
-    channel_id = event.get('channel')
-    user_id = event.get('user')
-    text = event.get('text')
-    if user_id != BOT_ID:
-        client.chat_postMessage(channel=channel_id, text=text)
-
-
-if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+# Start your app
+if __name__ == "__main__":
+    app.start(port=int(os.environ.get("PORT", 5000)))
