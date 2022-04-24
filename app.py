@@ -4,7 +4,7 @@ from flask import Flask
 from slackeventsapi import SlackEventAdapter
 
 app = Flask(__name__)
-slack_event_adapter = SlackEventAdapter(os.environ['SLACK_SIGNGIN_SECRET'], '/slack/events', app)
+slack_event_adapter = SlackEventAdapter(os.environ['SLACK_SIGNIN_SECRET'], '/slack/events', app)
 client = slack.WebClient(token=os.environ['SLACK_BOT_TOKEN'])
 
 client.chat_postMessage(channel='#ditto-testing', text='Ditto running...')
